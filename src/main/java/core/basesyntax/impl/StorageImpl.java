@@ -1,28 +1,27 @@
 package core.basesyntax.impl;
 
+import core.basesyntax.Pair;
 import core.basesyntax.Storage;
+import java.util.Objects;
 
 public class StorageImpl<K, V> implements Storage<K, V> {
-
     private static final int MAX_SIZE = 10;
 
-    private K[] keys;
-    private V[] values;
+    private Pair<K, V>[] pairs;
     private int size;
 
     @SuppressWarnings("unchecked")
     public StorageImpl() {
-        keys = (K[]) new Object[MAX_SIZE];
-        values = (V[]) new Object[MAX_SIZE];
+        pairs = (Pair<K, V>[]) new Pair[MAX_SIZE];
         size = 0;
     }
 
     @Override
     public void put(K key, V value) {
-        int index = findIndexByKey(key);
+        int index = findIndex(key);
 
         if (index != -1) {
-            values[index] = value; // replace existing value
+            pairs[index] = new Pair<>(key, value);
             return;
         }
 
@@ -30,15 +29,13 @@ public class StorageImpl<K, V> implements Storage<K, V> {
             throw new IllegalStateException("Storage is full");
         }
 
-        keys[size] = key;
-        values[size] = value;
-        size++;
+        pairs[size++] = new Pair<>(key, value);
     }
 
     @Override
     public V get(K key) {
-        int index = findIndexByKey(key);
-        return index != -1 ? values[index] : null;
+        int index = findIndex(key);
+        return index == -1 ? null : pairs[index].getValue();
     }
 
     @Override
@@ -46,9 +43,9 @@ public class StorageImpl<K, V> implements Storage<K, V> {
         return size;
     }
 
-    private int findIndexByKey(K key) {
+    private int findIndex(K key) {
         for (int i = 0; i < size; i++) {
-            if (keys[i] == null ? key == null : keys[i].equals(key)) {
+            if (Objects.equals(pairs[i].getKey(), key)) {
                 return i;
             }
         }
